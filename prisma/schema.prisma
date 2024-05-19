@@ -1,0 +1,37 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-py"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId String @unique
+  chats  Chat[]
+}
+
+model Chat {
+  chatId    String    @unique @default(uuid())
+  title     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  Messages  Message[]
+  User      User      @relation(fields: [user_Id], references: [userId])
+  user_Id   String
+}
+
+model Message {
+  messageId     String  @unique @default(uuid())
+  Chat          Chat?   @relation(fields: [chat_Id], references: [chatId])
+  chat_Id       String?
+  content       String
+  profileImgUrl String
+}
