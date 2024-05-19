@@ -1,5 +1,7 @@
 import os
-from fastapi import FastAPI, UploadFile
+from typing import Annotated
+from urllib import request
+from fastapi import FastAPI, File, Form, UploadFile
 from dotenv import find_dotenv, load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -14,7 +16,17 @@ S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
 
 app = FastAPI()
 
-app.add_middleware(CORSMiddleware)
+origins = [
+    "http://localhost:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -23,13 +35,15 @@ def index():
 
 
 @app.post("/upload-file")
-async def upload_file(file: UploadFile):
-    print(file)
+async def upload_file(
+    file: Annotated[UploadFile, File(...)], userId: Annotated[str, Form()]
+):
     s3_client = boto3.client(
         "s3",
         aws_access_key_id=AWS_ACCESS_KEY_ID,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     )
-    s3_client.upload_fileobj(file.file, S3_BUCKET_NAME, file.filename)
+
+    s3_client.upload_fileobj(file.file, S3_BUCKET_NAME, f"{userId}/{file.filename}")
 
     return {"message": "File uploaded succefully"}
