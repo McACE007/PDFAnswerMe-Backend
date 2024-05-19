@@ -1,6 +1,5 @@
 import os
 from typing import Annotated
-from urllib import request
 from fastapi import FastAPI, File, Form, UploadFile
 from dotenv import find_dotenv, load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
